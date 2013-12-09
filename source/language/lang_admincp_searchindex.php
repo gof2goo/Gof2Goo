@@ -4,7 +4,7 @@
  *      [Discuz!] (C)2001-2099 Comsenz Inc.
  *      This is NOT a freeware, use is subject to license terms
  *
- *      $Id: lang_admincp_searchindex.php 34035 2013-09-24 01:43:53Z nemohou $
+ *      $Id: lang_admincp_searchindex.php 33440 2013-06-17 02:39:05Z nemohou $
  *
  *	This file is automatically generate
  */
@@ -817,11 +817,11 @@ $lang = array (
   array (
     'index' =>
     array (
-      '审核用户' => 'action=moderate&operation=members',
+      '审核新用户' => 'action=moderate&operation=members',
     ),
     'text' =>
     array (
-      0 => '审核用户',
+      0 => '审核新用户',
     ),
   ),
   74 =>
@@ -1764,7 +1764,7 @@ $lang = array (
       5 => '设置是否允许审核用户发表的帖子，只在站点设置需要审核时有效',
       6 => 'admingroup_edit_mod_user',
       7 => '允许审核用户',
-      8 => '设置是否允许审核新注册用户，只在站点设置需要人工审核用户时有效',
+      8 => '设置是否允许审核新注册用户，只在站点设置需要人工审核新用户时有效',
       9 => 'admingroup_edit_ban_user',
       10 => '允许禁止用户发言',
       11 => '设置是否允许禁止用户发言',
@@ -2158,7 +2158,7 @@ $lang = array (
       0 => '允许前台充值',
       1 => 'card_config_open',
       2 => '允许前台充值',
-      3 => '设置是否允许前台充值，关闭前台充值功能，不影响后台卡密的生成充值卡密验证码开关：全局->防灌水->验证设置',
+      3 => '设置是否允许前台充值，关闭前台充值功能，不影响后台卡密的生成充值卡密验证码开关：全局->防灌水设置->验证码设置',
     ),
   ),
   166 =>
@@ -6048,33 +6048,36 @@ $lang = array (
       11 => 'setting_mobile_register',
       12 => '是否允许手机版注册',
       13 => '是否开启手机版注册功能，手机注册不会对用户栏目中的注册页必填项进行检测请谨慎开启',
-      14 => 'setting_mobile_hotthread',
-      15 => '是否开启热帖',
-      16 => '“触屏版”功能，开启则在首页显示热贴',
-      17 => 'setting_mobile_displayorder3',
-      18 => '是否显示置顶贴',
-      19 => '“触屏版”功能，在帖子列表页面中是否显示置顶贴，否为不显示',
-      20 => 'setting_mobile_simpletype',
-      21 => '开启不显示图片',
-      22 => '默认显示图片，开启后，“触屏版”不显示帖子图片，“标准版”不显示帖子图片、小图标、主题列表日期等页面元素',
-      23 => 'setting_mobile_topicperpage',
-      24 => '每页显示主题数',
-      25 => '主题列表页每页显示主题个数，推荐值为10',
-      26 => 'setting_mobile_postperpage',
-      27 => '主题内每页显示帖数',
-      28 => '主题内每页显示的帖子数目，推荐值为5',
-      29 => 'setting_mobile_cachetime',
-      30 => '页面浏览缓存时间',
-      31 => '设置访问过的页面在用户手机上保存的时间，留空或0为不缓存单位：秒',
-      32 => 'setting_mobile_index_forumview',
-      33 => '首页分区展示方式',
-      34 => '如“收起”，论坛首页将默认只展示分区标题用户需点击分区展开该分区下的版块列表',
-      35 => 'setting_mobile_come_from',
-      36 => '手机发帖来源自定义',
-      37 => '默认留空，如果填写，将在看帖页面"来自手机"处增加自定义文字或图标如:&lt;a href=\'http://m.x.com\'&gt;手机频道&lt;/a&gt;此处支持HTML标签有：&lt;a&gt;&lt;font&gt;&lt;span&gt;&lt;strong&gt;&lt;b&gt;&lt;img&gt;如果使用图标，请保证图片高度在16px(像素)以内',
-      38 => 'setting_mobile_wml',
-      39 => '是否启用极简版',
-      40 => '极简版为一些仅支持WML语言的较早期的设备浏览网站的内容',
+      14 => 'setting_mobile_seccode',
+      15 => '是否开启验证码',
+      16 => '不开启则手机注册、登录、发布等操作均无验证码注册、登录、发布验证码开关：全局 - 防灌水设置 - 验证码设置',
+      17 => 'setting_mobile_hotthread',
+      18 => '是否开启热帖',
+      19 => '“触屏版”功能，开启则在首页显示热贴',
+      20 => 'setting_mobile_displayorder3',
+      21 => '是否显示置顶贴',
+      22 => '“触屏版”功能，在帖子列表页面中是否显示置顶贴，否为不显示',
+      23 => 'setting_mobile_simpletype',
+      24 => '开启不显示图片',
+      25 => '默认显示图片，开启后，“触屏版”不显示帖子图片，“标准版”不显示帖子图片、小图标、主题列表日期等页面元素',
+      26 => 'setting_mobile_topicperpage',
+      27 => '每页显示主题数',
+      28 => '主题列表页每页显示主题个数，推荐值为10',
+      29 => 'setting_mobile_postperpage',
+      30 => '主题内每页显示帖数',
+      31 => '主题内每页显示的帖子数目，推荐值为5',
+      32 => 'setting_mobile_cachetime',
+      33 => '页面浏览缓存时间',
+      34 => '设置访问过的页面在用户手机上保存的时间，留空或0为不缓存单位：秒',
+      35 => 'setting_mobile_index_forumview',
+      36 => '首页分区展示方式',
+      37 => '如“收起”，论坛首页将默认只展示分区标题用户需点击分区展开该分区下的版块列表',
+      38 => 'setting_mobile_come_from',
+      39 => '手机发帖来源自定义',
+      40 => '默认留空，如果填写，将在看帖页面"来自手机"处增加自定义文字或图标如:&lt;a href=\'http://m.x.com\'&gt;手机频道&lt;/a&gt;此处支持HTML标签有：&lt;a&gt;&lt;font&gt;&lt;span&gt;&lt;strong&gt;&lt;b&gt;&lt;img&gt;如果使用图标，请保证图片高度在16px(像素)以内',
+      41 => 'setting_mobile_wml',
+      42 => '是否启用极简版',
+      43 => '极简版为一些仅支持WML语言的较早期的设备浏览网站的内容',
     ),
   ),
   292 =>
@@ -6453,7 +6456,7 @@ $lang = array (
       65 => '开启防灌水验证机制可以防止灌水机等，但会增加用户操作易用度。修改密码不受此限制，开启防灌水验证码或验证问答后，该设置有效',
       66 => 'usergroups_edit_basic_forcesecques',
       67 => '强制设置安全提问',
-      68 => '选择“是”则此用户组的用户在登录后台前必须设置安全提问后才可登录后台, config中为全局开关',
+      68 => '选择“是”则此用户组的用户在登录后台前必须设置安全提问后才可登陆后台, config中为全局开关',
       69 => 'usergroups_edit_basic_disable_postctrl',
       70 => '发表不受限制',
       71 => '设置发表是否不受灌水预防和最大字数等',

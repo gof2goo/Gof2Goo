@@ -4,7 +4,7 @@
  *      [Discuz!] (C)2001-2099 Comsenz Inc.
  *      This is NOT a freeware, use is subject to license terms
  *
- *      $Id: install.php 33766 2013-08-12 02:38:48Z nemohou $
+ *      $Id: install.php 33344 2013-05-30 04:37:03Z jeffjzhang $
  */
 
 if(!defined('IN_DISCUZ')) {
@@ -76,13 +76,13 @@ if(file_exists(DISCUZ_ROOT . './source/include/cron/cron_security_cleanup_lastpo
 include DISCUZ_ROOT . 'source/language/lang_admincp_cloud.php';
 if(file_exists(DISCUZ_ROOT . './source/include/cron/cron_security_cleanup_lastpost.php') && empty($cronId_security_lastpost)) {
 	$data = array(
-		'available' => 1,
-		'type' => 'system',
+		'available' => 0,
+		'type' => 'user',
 		'name' => $extend_lang['security_cron_lastpost'],
 		'filename' => 'cron_security_cleanup_lastpost.php',
 		'weekday' => -1,
 		'day' => -1,
-		'hour' => 7,
+		'hour' => -1,
 		'minute' => 0,
 	);
 	C::t('common_cron')->insert($data, true, false, false);
@@ -91,7 +91,7 @@ if (file_exists(DISCUZ_ROOT . './source/include/cron/cron_security_daily.php')) 
 	if (empty($cronId_security_daily)) {
 		$data = array(
 			'available' => 1,
-			'type' => 'system',
+			'type' => 'user',
 			'name' => $extend_lang['security_cron_daily'],
 			'filename' => 'cron_security_daily.php',
 			'weekday' => -1,

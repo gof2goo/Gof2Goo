@@ -4,7 +4,7 @@
  *      [Discuz!] (C)2001-2099 Comsenz Inc.
  *      This is NOT a freeware, use is subject to license terms
  *
- *      $Id: model_forum_post.php 33881 2013-08-27 03:10:46Z nemohou $
+ *      $Id: model_forum_post.php 33619 2013-07-17 06:18:28Z andyzheng $
  */
 
 if(!defined('IN_DISCUZ')) {
@@ -127,7 +127,6 @@ class model_forum_post extends discuz_model {
 			'dateline' => $this->param['timestamp'] ? $this->param['timestamp'] : getglobal('timestamp'),
 			'message' => $this->param['message'],
 			'useip' => $this->param['clientip'] ? $this->param['clientip'] : getglobal('clientip'),
-			'port' => $this->param['remoteport'] ? $this->param['remoteport'] : getglobal('remoteport'),
 			'invisible' => $pinvisible,
 			'anonymous' => $this->param['isanonymous'],
 			'usesig' => $usesig,
@@ -138,7 +137,6 @@ class model_forum_post extends discuz_model {
 			'attachment' => '0',
 			'status' => $status,
 		));
-
 
 		$this->param['updatethreaddata'] = $heatthreadset ? $heatthreadset : array();
 		$this->param['maxposition'] = C::t('forum_post')->fetch_maxposition_by_tid($this->thread['posttableid'], $this->thread['tid']);
@@ -206,6 +204,7 @@ class model_forum_post extends discuz_model {
 		include_once libfile('function/stat');
 		updatestat($this->thread['isgroup'] ? 'grouppost' : 'post');
 
+		C::t('common_remote_port')->insert(array('id'=>$this->pid,'idtype'=>'post','useip'=>getglobal('clientip'),'port'=>getglobal('remoteport')), false, true);
 
 		$this->param['showmsgparam']['fid'] = $this->forum['fid'];
 		$this->param['showmsgparam']['tid'] = $this->thread['tid'];
@@ -372,8 +371,7 @@ class model_forum_post extends discuz_model {
 			$publishdate = null;
 			if ($this->group['allowsetpublishdate'] && $this->thread['displayorder'] == -4) {
 				$cron_publish_ids = dunserialize($this->cache('cronpublish'));
-				if (!$this->param['cronpublish'] && in_array($this->thread['tid'], $cron_publish_ids) || $this->param['modnewthreads']) {
-					$this->param['threadupdatearr']['dateline'] = $publishdate = TIMESTAMP;
+				if (!$this->param['cronpublish'] && in_array($this->thread['tid'], $cron_publish_ids)) {
 					unset($cron_publish_ids[$this->thread['tid']]);
 					$cron_publish_ids = serialize($cron_publish_ids);
 					savecache('cronpublish', $cron_publish_ids);
@@ -490,8 +488,7 @@ class model_forum_post extends discuz_model {
 			'parseurloff' => $this->param['parseurloff'],
 			'smileyoff' => $this->param['smileyoff'],
 			'subject' => $this->param['subject'],
-			'tags' => $tagstr,
-			'port'=>getglobal('remoteport')
+			'tags' => $tagstr
 		);
 
 		$setarr['status'] = $this->post['status'];
@@ -514,6 +511,7 @@ class model_forum_post extends discuz_model {
 		}
 		C::t('forum_post')->update('tid:'.$this->thread['tid'], $this->post['pid'], $setarr);
 
+		C::t('common_remote_port')->insert(array('id'=>$this->post['pid'],'idtype'=>'post','useip'=>getglobal('clientip'),'port'=>getglobal('remoteport')), false, true);
 
 
 		$this->forum['lastpost'] = explode("\t", $this->forum['lastpost']);

@@ -2,7 +2,7 @@
 	[Discuz!] (C)2001-2099 Comsenz Inc.
 	This is NOT a freeware, use is subject to license terms
 
-	$Id: editor.js 34039 2013-09-24 02:37:27Z nemohou $
+	$Id: editor.js 33650 2013-07-26 07:45:14Z nemohou $
 */
 
 var editorcurrentheight = 400, editorminheight = 400, savedataInterval = 30, editbox = null, editwin = null, editdoc = null, editcss = null, savedatat = null, savedatac = 0, autosave = 1, framemObj = null, cursor = -1, stack = [], initialized = false, postSubmited = false, editorcontroltop = false, editorcontrolwidth = false, editorcontrolheight = false, editorisfull = 0, fulloldheight = 0, savesimplodemode = null;
@@ -1308,9 +1308,7 @@ function showEditorMenu(tag, params) {
 			case 'vid':
 				var mediaUrl = $(ctrlid + '_param_1').value;
 				var auto = '';
-				var posque = mediaUrl.lastIndexOf('?');
-				posque = posque === -1 ? mb_strlen(mediaUrl) : posque;
-				var ext = mediaUrl.lastIndexOf('.') === -1 ? '' : mediaUrl.substring(mediaUrl.lastIndexOf('.') + 1, posque).toLowerCase();
+				var ext = mediaUrl.lastIndexOf('.') == -1 ? '' : mediaUrl.substr(mediaUrl.lastIndexOf('.') + 1, mb_strlen(mediaUrl)).toLowerCase();
 				ext = in_array(ext, ['mp3', 'wma', 'ra', 'rm', 'ram', 'mid', 'asx', 'wmv', 'avi', 'mpg', 'mpeg', 'rmvb', 'asf', 'mov', 'flv', 'swf']) ? ext : 'x';
 				if(ext == 'x') {
 					if(/^mms:\/\//.test(mediaUrl)) {
@@ -1450,13 +1448,12 @@ function insertText(text, movestart, moveend, select, sel) {
 			sel.removeAllRanges();
 			sel.addRange(range);
 		} catch(e) {
-			sel = null;
 			if(!isUndefined(editdoc.selection) && editdoc.selection.type != 'Text' && editdoc.selection.type != 'None') {
 				movestart = false;
 				editdoc.selection.clear();
 			}
 
-			if(isUndefined(sel) || sel == null) {
+			if(isUndefined(sel)) {
 				sel = editdoc.selection.createRange();
 			}
 

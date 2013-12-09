@@ -2,13 +2,13 @@
 	[Discuz!] (C)2001-2099 Comsenz Inc.
 	This is NOT a freeware, use is subject to license terms
 
-	$Id: common.js 34029 2013-09-23 06:51:33Z nemohou $
+	$Id: common.js 33674 2013-07-31 08:32:24Z laoguozhang $
 */
 
 var BROWSER = {};
 var USERAGENT = navigator.userAgent.toLowerCase();
 browserVersion({'ie':'msie','firefox':'','chrome':'','opera':'','safari':'','mozilla':'','webkit':'','maxthon':'','qq':'qqbrowser','rv':'rv'});
-if(BROWSER.safari || BROWSER.rv) {
+if(BROWSER.safari) {
 	BROWSER.firefox = true;
 }
 BROWSER.opera = BROWSER.opera ? opera.version() : 0;
@@ -908,9 +908,6 @@ function showMenu(v) {
 	var zindex = isUndefined(v['zindex']) ? JSMENU['zIndex']['menu'] : v['zindex'];
 	var ctrlclass = isUndefined(v['ctrlclass']) ? '' : v['ctrlclass'];
 	var winhandlekey = isUndefined(v['win']) ? '' : v['win'];
-	if(winhandlekey && ctrlObj && !ctrlObj.getAttribute('fwin')) {
-		ctrlObj.setAttribute('fwin', winhandlekey);
-	}
 	zindex = cover ? zindex + 500 : zindex;
 	if(typeof JSMENU['active'][layer] == 'undefined') {
 		JSMENU['active'][layer] = [];
@@ -1129,8 +1126,9 @@ function dragMenu(menuObj, e, op) {
 			return;
 		}
 		JSMENU['drag'] = [e.clientX, e.clientY];
-		JSMENU['drag'][2] = parseInt(menuObj.style.left);
-		JSMENU['drag'][3] = parseInt(menuObj.style.top);
+		var sxy = fetchOffset(menuObj);
+		JSMENU['drag'][2] = parseInt(sxy['left']) || 0;
+		JSMENU['drag'][3] = parseInt(sxy['top']) || 0;
 		document.onmousemove = function(e) {try{dragMenu(menuObj, e, 2);}catch(err){}};
 		document.onmouseup = function(e) {try{dragMenu(menuObj, e, 3);}catch(err){}};
 		doane(e);
@@ -1786,7 +1784,7 @@ function ctrlEnter(event, btnId, onlyEnter) {
 
 function parseurl(str, mode, parsecode) {
 	if(isUndefined(parsecode)) parsecode = true;
-	if(parsecode) str= str.replace(/\[code\]([\s\S]+?)\[\/code\]/ig, function($1, $2) {return codetag($2, -1);});
+	if(parsecode) str= str.replace(/\s*\[code\]([\s\S]+?)\[\/code\]\s*/ig, function($1, $2) {return codetag($2, -1);});
 	str = str.replace(/([^>=\]"'\/]|^)((((https?|ftp):\/\/)|www\.)([\w\-]+\.)*[\w\-\u4e00-\u9fa5]+\.([\.a-zA-Z0-9]+|\u4E2D\u56FD|\u7F51\u7EDC|\u516C\u53F8)((\?|\/|:)+[\w\.\/=\?%\-&~`@':+!]*)+\.(swf|flv))/ig, '$1[flash]$2[/flash]');
 	str = str.replace(/([^>=\]"'\/]|^)((((https?|ftp):\/\/)|www\.)([\w\-]+\.)*[\w\-\u4e00-\u9fa5]+\.([\.a-zA-Z0-9]+|\u4E2D\u56FD|\u7F51\u7EDC|\u516C\u53F8)((\?|\/|:)+[\w\.\/=\?%\-&~`@':+!]*)+\.(mp3|wma))/ig, '$1[audio]$2[/audio]');
 	str = str.replace(/([^>=\]"'\/@]|^)((((https?|ftp|gopher|news|telnet|rtsp|mms|callto|bctp|ed2k|thunder|qqdl|synacast):\/\/))([\w\-]+\.)*[:\.@\-\w\u4e00-\u9fa5]+\.([\.a-zA-Z0-9]+|\u4E2D\u56FD|\u7F51\u7EDC|\u516C\u53F8)((\?|\/|:)+[\w\.\/=\?%\-&;~`@':+!#]*)*)/ig, mode == 'html' ? '$1<a href="$2" target="_blank">$2</a>' : '$1[url]$2[/url]');
@@ -1981,7 +1979,7 @@ function updatesecqaa(idhash) {
 	$F('_updatesecqaa', arguments);
 }
 
-function updateseccode(idhash) {
+function updateseccode(idhash, play) {
 	$F('_updateseccode', arguments);
 }
 

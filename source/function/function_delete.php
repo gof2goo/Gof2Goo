@@ -4,7 +4,7 @@
  *      [Discuz!] (C)2001-2099 Comsenz Inc.
  *      This is NOT a freeware, use is subject to license terms
  *
- *      $Id: function_delete.php 34074 2013-10-08 01:30:38Z nemohou $
+ *      $Id: function_delete.php 33288 2013-05-22 02:23:20Z nemohou $
  */
 
 if(!defined('IN_DISCUZ')) {
@@ -64,8 +64,7 @@ function deletemember($uids, $delpost = true) {
 	C::t('common_myinvite')->delete_by_touid_or_fromuid($uids);
 	C::t('common_moderate')->delete($arruids, 'uid_cid');
 	C::t('common_member_forum_buylog')->delete_by_uid($arruids);
-	C::t('forum_threadhidelog')->delete_by_uid($arruids);
-	C::t('common_member_crime')->delete_by_uid($arruids);
+
 
 	foreach(C::t('forum_collectionfollow')->fetch_all_by_uid($arruids) as $follow) {
 		C::t('forum_collection')->update_by_ctid($follow['ctid'], 0, -1);
@@ -408,7 +407,6 @@ function deletethread($tids, $membercount = false, $credit = false, $ponly = fal
 	C::t('forum_replycredit')->delete($arrtids);
 	C::t('forum_post_location')->delete_by_tid($arrtids);
 	C::t('common_credit_log')->delete_by_operation_relatedid(array('RCT', 'RCA', 'RCB'), $arrtids);
-	C::t('forum_threadhidelog')->delete_by_tid($arrtids);
 	deletethreadcover($arrtids);
 	foreach($threadtables as $tableid) {
 		C::t('forum_thread')->delete_by_tid($arrtids, false, $tableid);

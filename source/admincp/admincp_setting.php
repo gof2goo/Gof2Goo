@@ -4,7 +4,7 @@
  *      [Discuz!] (C)2001-2099 Comsenz Inc.
  *      This is NOT a freeware, use is subject to license terms
  *
- *      $Id: admincp_setting.php 34093 2013-10-09 05:41:18Z nemohou $
+ *      $Id: admincp_setting.php 33440 2013-06-17 02:39:05Z nemohou $
  */
 if(!defined('IN_DISCUZ') || !defined('IN_ADMINCP')) {
 	exit('Access Denied');
@@ -45,12 +45,6 @@ if(!submitcheck('settingsubmit')) {
 		shownav('user', 'nav_members_profile_group');
 	} elseif($operation == 'threadprofile') {
 		shownav('style', 'setting_threadprofile');
-	} elseif($operation == 'sec') {
-		shownav('safe', 'setting_sec');
-	} elseif($operation == 'seccheck') {
-		shownav('safe', 'setting_seccheck');
-	} elseif($operation == 'accountguard') {
-		shownav('safe', 'setting_accountguard');
 	} elseif(in_array($operation, array('mail', 'uc'))) {
 		shownav('founder', 'setting_'.$operation);
 	} else {
@@ -112,17 +106,13 @@ if(!submitcheck('settingsubmit')) {
 			array('setting_mail_check', 'mailcheck', $_GET['anchor'] == 'check')
 		));
 	} elseif($operation == 'sec') {
-		$_GET['anchor'] = in_array($_GET['anchor'], array('base', 'reginput', 'postperiodtime')) ? $_GET['anchor'] : 'base';
+		$_GET['anchor'] = in_array($_GET['anchor'], array('base', 'seccode', 'secqaa', 'reginput', 'postperiodtime')) ? $_GET['anchor'] : 'base';
 		showsubmenuanchors('setting_sec', array(
 			array('setting_sec_base', 'base', $_GET['anchor'] == 'base'),
-			array('setting_sec_reginput', 'reginput', $_GET['anchor'] == 'reginput'),
-			array('setting_sec_postperiodtime', 'postperiodtime', $_GET['anchor'] == 'postperiodtime'),
-		));
-	} elseif($operation == 'seccheck') {
-		$_GET['anchor'] = in_array($_GET['anchor'], array('seccode', 'secqaa')) ? $_GET['anchor'] : 'seccode';
-		showsubmenuanchors('setting_seccheck', array(
 			array('setting_sec_seccode', 'seccode', $_GET['anchor'] == 'seccode'),
 			array('setting_sec_secqaa', 'secqaa', $_GET['anchor'] == 'secqaa'),
+			array('setting_sec_reginput', 'reginput', $_GET['anchor'] == 'reginput'),
+			array('setting_sec_postperiodtime', 'postperiodtime', $_GET['anchor'] == 'postperiodtime')
 		));
 	} elseif($operation == 'attach') {
 		$_GET['anchor'] = in_array($_GET['anchor'], array('basic', 'forumattach', 'remote', 'albumattach', 'portalarticle')) ? $_GET['anchor'] : 'basic';
@@ -526,8 +516,17 @@ if(!submitcheck('settingsubmit')) {
 		$setting['guestviewthumb'] = dunserialize($setting['guestviewthumb']);
 		$setting['guesttipsinthread'] = dunserialize($setting['guesttipsinthread']);
 
+		$stylelist = "<select name=\"settingnew[styleid]\">\n";
+		$query = DB::query("SELECT styleid, name FROM ".DB::table('common_style')."");
+		while($style = DB::fetch($query)) {
+			$selected = $style['styleid'] == $setting['styleid'] ? 'selected="selected"' : NULL;
+			$stylelist .= "<option value=\"$style[styleid]\" $selected>$style[name]</option>\n";
+		}
+		$stylelist .= '</select>';
+
 		showtips('setting_tips', 'global_tips', $_GET['anchor'] == 'global');
 		showtableheader('setting_styles_global', 'nobottom', 'id="global"'.($_GET['anchor'] != 'global' ? ' style="display: none"' : ''));
+		showsetting('setting_styles_global_styleid', '', '', $stylelist);
 		showsetting('setting_styles_global_home_style', array('settingnew[homestyle]', array(
 				array(1, $lang['setting_styles_global_home_style_1']),
 				array(0, $lang['setting_styles_global_home_style_0']),
@@ -1601,46 +1600,15 @@ EOF;
 		showformfooter();
 		exit;
 
-	} elseif($operation == 'accountguard') {
+	} elseif($operation == 'sec') {
 
-		loadcache('usergroups');
-		$setting['accountguard'] = dunserialize($setting['accountguard']);
-		$usergroups = C::t('common_usergroup_field')->fetch_all(array_keys($_G['cache']['usergroups']));
-		showtableheader('', 'nobottom');
-		$forcelogin = '<tr class="header"><td></td><td>'.cplang('usergroups_edit_basic_forcelogin_none').'</td>'.($_G['setting']['connect']['allow'] ? '<td>'.cplang('usergroups_edit_basic_forcelogin_qq').'</td>' : '').'<td>'.cplang('usergroups_edit_basic_forcelogin_mail').'</td></tr>';
-		ksort($_G['cache']['usergroups']);
-		foreach($_G['cache']['usergroups'] as $gid => $usergroup) {
-			if(in_array($gid, array(7, 8))) {
-				continue;
-			}
-			$forcelogin .= '<tr class="hover"><td>'.$usergroup['grouptitle'].'</td>'.
-				'<td><label><input class="radio" type="radio" name="aggid['.$gid.']" '.(!$usergroups[$gid]['forcelogin'] ? 'checked ' : '').'value="0">'.'</label></td>'.
-				($_G['setting']['connect']['allow'] ? '<td><label><input class="radio" type="radio" name="aggid['.$gid.']" '.($usergroups[$gid]['forcelogin'] == 1 ? 'checked ' : '').'value="1">'.'</label></td>' : '').
-				'<td><label><input class="radio" type="radio" name="aggid['.$gid.']" '.($usergroups[$gid]['forcelogin'] == 2 ? 'checked ' : '').'value="2">'.'</label></td>'.
-				'</tr>';
-		}
-		$forcelogin .= '<tr><td colspan="3" class="lineheight">'.cplang('setting_sec_accountguard_forcelogin_comment').'</td></table>';
-		if($_G['setting']['connect']['allow']) {
-			showsetting('setting_sec_accountguard_postqqonly', 'settingnew[accountguard][postqqonly]', $setting['accountguard']['postqqonly'], 'radio');
-		}
-		showsetting('setting_sec_accountguard_loginpwcheck', array('settingnew[accountguard][loginpwcheck]', array(
-			array(0, $lang['setting_sec_accountguard_loginpwcheck_none']),
-			array(1, $lang['setting_sec_accountguard_loginpwcheck_prompt']),
-			array(2, $lang['setting_sec_accountguard_loginpwcheck_force']))),  $setting['accountguard']['loginpwcheck'], 'mradio');
-		showsetting('setting_sec_accountguard_loginoutofdate', 'settingnew[accountguard][loginoutofdate]', $setting['accountguard']['loginoutofdate'], 'radio');
-		showtablefooter();
-		showtableheader('setting_sec_accountguard_forcelogin', 'nobottom');
-		echo $forcelogin;
-		showtablefooter();
-
-	} elseif($operation == 'seccheck') {
-
-		$seccodecheck = 1;
-		$sechash = 'S'.$_G['sid'];
-		$seccheckhtml = "<span id=\"seccode_c$sechash\"></span><script type=\"text/javascript\">updateseccode('c$sechash', '<br /><sec> <sec> <sec>', 'admin');</script>";
+		$seccodecheck = $secreturn = 1;
+		$sectpl = '<br /><sec>: <sec><sec>';
+		include template('common/seccheck');
 
 		$checksc = array();
 		$setting['seccodedata'] = dunserialize($setting['seccodedata']);
+		$setting['reginput'] = dunserialize($setting['reginput']);
 
 		$seccodetypearray = array(
 			array(0, cplang('setting_sec_seccode_type_image'), array('seccodeimageext' => '', 'seccodeimagewh' => '')),
@@ -1652,74 +1620,24 @@ EOF;
 
 		$seccodetypearray = array_merge($seccodetypearray, getseccodes($seccodesettings));
 
+		showtableheader('', '', 'id="base"'.($_GET['anchor'] != 'base' ? ' style="display: none"' : ''));
+		showsetting('setting_sec_floodctrl', 'settingnew[floodctrl]', $setting['floodctrl'], 'text');
+		showsetting('setting_sec_base_need_email', 'settingnew[need_email]', $setting['need_email'], 'radio');
+		showsetting('setting_sec_base_need_avatar', 'settingnew[need_avatar]', $setting['need_avatar'], 'radio');
+		showsetting('setting_sec_base_need_friendnum', 'settingnew[need_friendnum]', $setting['need_friendnum'], 'text');
+		showsubmit('settingsubmit');
+		showtablefooter();
+
 		showtips('setting_sec_code_tips', 'seccode_tips', $_GET['anchor'] == 'seccode');
-
 		showtableheader('', '', 'id="seccode"'.($_GET['anchor'] != 'seccode' ? ' style="display: none"' : ''));
-		showtitle('setting_sec_seccode_rule_setting');
-		showsetting('setting_sec_seccode_cloudip', 'settingnew[seccodedata][cloudip]', $setting['seccodedata']['cloudip'], 'radio');
-		showsetting('setting_sec_seccode_rule_register', array('settingnew[seccodedata][rule][register][allow]', array(
-			array(2, cplang('setting_sec_seccode_rule_register_auto'), array('secrule_register' => '')),
-			array(1, cplang('setting_sec_seccode_rule_register_on'), array('secrule_register' => 'none')),
-			array(0, cplang('setting_sec_seccode_rule_register_off'), array('secrule_register' => 'none')),
-		)), $setting['seccodedata']['rule']['register']['allow'], 'mradio');
-		showtagheader('tbody', 'secrule_register', $setting['seccodedata']['rule']['register']['allow'] == 2, 'sub');
-		showsetting('setting_sec_seccode_rule_register_numlimit', 'settingnew[seccodedata][rule][register][numlimit]', $setting['seccodedata']['rule']['register']['numlimit'], 'text');
-		showsetting('setting_sec_seccode_rule_register_timelimit', array('settingnew[seccodedata][rule][register][timelimit]', array(
-			array(60, '1 '.cplang('setting_sec_seccode_rule_min')),
-			array(180, '3'.cplang('setting_sec_seccode_rule_min')),
-			array(300, '5'.cplang('setting_sec_seccode_rule_min')),
-			array(900, '15'.cplang('setting_sec_seccode_rule_min')),
-			array(1800, '30'.cplang('setting_sec_seccode_rule_min')),
-			array(3600, '1'.cplang('setting_sec_seccode_rule_hour')),
-		)), $setting['seccodedata']['rule']['register']['timelimit'], 'select', 'noborder');
-		showtagfooter('tbody');
-
-		showsetting('setting_sec_seccode_rule_login', array('settingnew[seccodedata][rule][login][allow]', array(
-			array(2, cplang('setting_sec_seccode_rule_login_auto'), array('secrule_login' => '')),
-			array(1, cplang('setting_sec_seccode_rule_login_on'), array('secrule_login' => 'none')),
-			array(0, cplang('setting_sec_seccode_rule_login_off'), array('secrule_login' => 'none')),
-		)), $setting['seccodedata']['rule']['login']['allow'], 'mradio');
-		showtagheader('tbody', 'secrule_login', $setting['seccodedata']['rule']['login']['allow'] == 2, 'sub');
-		showsetting('setting_sec_seccode_rule_login_nolocal', 'settingnew[seccodedata][rule][login][nolocal]', $setting['seccodedata']['rule']['login']['nolocal'], 'radio');
-		showsetting('setting_sec_seccode_rule_login_pwsimple', 'settingnew[seccodedata][rule][login][pwsimple]', $setting['seccodedata']['rule']['login']['pwsimple'], 'radio');
-		showsetting('setting_sec_seccode_rule_login_pwerror', 'settingnew[seccodedata][rule][login][pwerror]', $setting['seccodedata']['rule']['login']['pwerror'], 'radio');
-		showsetting('setting_sec_seccode_rule_login_outofday', 'settingnew[seccodedata][rule][login][outofday]', $setting['seccodedata']['rule']['login']['outofday'], 'text');
-		showsetting('setting_sec_seccode_rule_login_numiptry', 'settingnew[seccodedata][rule][login][numiptry]', $setting['seccodedata']['rule']['login']['numiptry'], 'text');
-		showsetting('setting_sec_seccode_rule_login_timeiptry', array('settingnew[seccodedata][rule][login][timeiptry]', array(
-			array(60, '1 '.cplang('setting_sec_seccode_rule_min')),
-			array(180, '3'.cplang('setting_sec_seccode_rule_min')),
-			array(300, '5'.cplang('setting_sec_seccode_rule_min')),
-			array(900, '15'.cplang('setting_sec_seccode_rule_min')),
-			array(1800, '30'.cplang('setting_sec_seccode_rule_min')),
-			array(3600, '1'.cplang('setting_sec_seccode_rule_hour')),
-		)), $setting['seccodedata']['rule']['login']['timeiptry'], 'select', 'noborder');
-		showtagfooter('tbody');
-
-		showsetting('setting_sec_seccode_rule_post', array('settingnew[seccodedata][rule][post][allow]', array(
-			array(2, cplang('setting_sec_seccode_rule_post_auto'), array('secrule_post' => '', 'secrule_post_common' => '')),
-			array(1, cplang('setting_sec_seccode_rule_post_on'), array('secrule_post' => 'none', 'secrule_post_common' => '')),
-			array(0, cplang('setting_sec_seccode_rule_post_off'), array('secrule_post' => 'none', 'secrule_post_common' => 'none')),
-		)), $setting['seccodedata']['rule']['post']['allow'], 'mradio');
-		showtagheader('tbody', 'secrule_post_common', $setting['seccodedata']['rule']['post']['allow'], 'sub');
-		showtagheader('tbody', 'secrule_post', $setting['seccodedata']['rule']['post']['allow'] == 2, 'sub');
-		showsetting('setting_sec_seccode_rule_post_numlimit', 'settingnew[seccodedata][rule][post][numlimit]', $setting['seccodedata']['rule']['post']['numlimit'], 'text');
-		showsetting('setting_sec_seccode_rule_post_timelimit', array('settingnew[seccodedata][rule][post][timelimit]', array(
-			array(60, '1 '.cplang('setting_sec_seccode_rule_min')),
-			array(180, '3'.cplang('setting_sec_seccode_rule_min')),
-			array(300, '5'.cplang('setting_sec_seccode_rule_min')),
-			array(900, '15'.cplang('setting_sec_seccode_rule_min')),
-			array(1800, '30'.cplang('setting_sec_seccode_rule_min')),
-			array(3600, '1'.cplang('setting_sec_seccode_rule_hour')),
-		)), $setting['seccodedata']['rule']['post']['timelimit'], 'select', 'noborder');
-		showsetting('setting_sec_seccode_rule_post_nplimit', 'settingnew[seccodedata][rule][post][nplimit]', $setting['seccodedata']['rule']['post']['nplimit'], 'text');
-		showsetting('setting_sec_seccode_rule_post_vplimit', 'settingnew[seccodedata][rule][post][vplimit]', $setting['seccodedata']['rule']['post']['vplimit'], 'text');
-		showtagfooter('tbody');
-
-		showsetting('setting_sec_seccode_rule_password', 'settingnew[seccodedata][rule][password][allow]', $setting['seccodedata']['rule']['password']['allow'], 'radio');
-		showsetting('setting_sec_seccode_rule_card', 'settingnew[seccodedata][rule][card][allow]', $setting['seccodedata']['rule']['card']['allow'], 'radio');
+		showsetting('setting_sec_seccode_status', array('settingnew[seccodestatus]', array(
+			cplang('setting_sec_seccode_status_register'),
+			cplang('setting_sec_seccode_status_login'),
+			cplang('setting_sec_seccode_status_post'),
+			cplang('setting_sec_seccode_status_password'),
+			cplang('setting_sec_seccode_status_card')
+		)), $setting['seccodestatus'], 'binmcheckbox');
 		showsetting('setting_sec_seccode_minposts', 'settingnew[seccodedata][minposts]', $setting['seccodedata']['minposts'], 'text');
-
-		showtitle('setting_sec_seccode_type_setting');
 		showsetting('setting_sec_seccode_type', array('settingnew[seccodedata][type]', $seccodetypearray), $setting['seccodedata']['type'], 'mradio', '', 0, cplang('setting_sec_seccode_type_comment').$seccheckhtml);
 		showtagheader('tbody', 'seccodeimagewh', is_numeric($setting['seccodedata']['type']) && $setting['seccodedata']['type'] != 3 && $setting['seccodedata']['type'] != 99, 'sub');
 		showsetting('setting_sec_seccode_width', 'settingnew[seccodedata][width]', $setting['seccodedata']['width'], 'text');
@@ -1787,18 +1705,6 @@ EOT;
 		showsubmit('settingsubmit', 'submit', 'del', '', $multipage);
 		showtablefooter();
 		showtagfooter('div');
-		exit;
-
-	} elseif($operation == 'sec') {
-
-		$setting['reginput'] = dunserialize($setting['reginput']);
-
-		showtableheader('', '', 'id="base"'.($_GET['anchor'] != 'base' ? ' style="display: none"' : ''));
-		showsetting('setting_sec_floodctrl', 'settingnew[floodctrl]', $setting['floodctrl'], 'text');
-		showsetting('setting_sec_base_need_email', 'settingnew[need_email]', $setting['need_email'], 'radio');
-		showsetting('setting_sec_base_need_avatar', 'settingnew[need_avatar]', $setting['need_avatar'], 'radio');
-		showsetting('setting_sec_base_need_friendnum', 'settingnew[need_friendnum]', $setting['need_friendnum'], 'text');
-		showtablefooter();
 
 		showtagheader('div', 'reginput', $_GET['anchor'] == 'reginput');
 		showtableheader('setting_sec_reginput', 'nobottom');
@@ -1806,6 +1712,7 @@ EOT;
 		showsetting('setting_sec_reginput_password', 'settingnew[reginput][password]', $setting['reginput']['password'], 'text');
 		showsetting('setting_sec_reginput_password2', 'settingnew[reginput][password2]', $setting['reginput']['password2'], 'text');
 		showsetting('setting_sec_reginput_email', 'settingnew[reginput][email]', $setting['reginput']['email'], 'text');
+		showsubmit('settingsubmit');
 		showtablefooter();
 		showtagfooter('div');
 
@@ -1815,8 +1722,12 @@ EOT;
 		showsetting('setting_datetime_postmodperiods', 'settingnew[postmodperiods]', $setting['postmodperiods'], 'textarea');
 		showsetting('setting_datetime_postignorearea', 'settingnew[postignorearea]', $setting['postignorearea'], 'textarea');
 		showsetting('setting_datetime_postignoreip', 'settingnew[postignoreip]', $setting['postignoreip'], 'textarea');
+		showsubmit('settingsubmit');
 		showtablefooter();
 		showtagfooter('div');
+		showformfooter();
+		exit;
+
 
 	} elseif($operation == 'datetime') {
 
@@ -2381,6 +2292,7 @@ EOT;
 		showtagheader('tbody', 'mobileext', $setting['mobile']['allowmobile'], 'sub');
 		showsetting('setting_mobile_mobileforward', 'settingnew[mobile][mobileforward]', $setting['mobile']['mobileforward'], 'radio');
 		showsetting('setting_mobile_register', 'settingnew[mobile][mobileregister]', $setting['mobile']['mobileregister'], 'radio');
+		showsetting('setting_mobile_seccode', 'settingnew[mobile][mobileseccode]', $setting['mobile']['mobileseccode'], 'radio');
 		showsetting('setting_mobile_hotthread', 'settingnew[mobile][mobilehotthread]', $setting['mobile']['mobilehotthread'], 'radio');
 		showsetting('setting_mobile_displayorder3', 'settingnew[mobile][mobiledisplayorder3]', $setting['mobile']['mobiledisplayorder3'], 'radio');
 		showsetting('setting_mobile_simpletype', 'settingnew[mobile][mobilesimpletype]', $setting['mobile']['mobilesimpletype'], 'radio');
@@ -2540,15 +2452,11 @@ EOT;
 		require_once './config/config_ucenter.php';
 		$ucdbpassnew = $settingnew['uc']['dbpass'] == '********' ? addslashes(UC_DBPW) : $settingnew['uc']['dbpass'];
 		if($settingnew['uc']['connect']) {
-			$uc_dblink = function_exists("mysql_connect") ? @mysql_connect($settingnew['uc']['dbhost'], $settingnew['uc']['dbuser'], $ucdbpassnew, 1) : new mysqli($settingnew['uc']['dbhost'], $settingnew['uc']['dbuser'], $ucdbpassnew);
+			$uc_dblink = @mysql_connect($settingnew['uc']['dbhost'], $settingnew['uc']['dbuser'], $ucdbpassnew, 1);
 			if(!$uc_dblink) {
 				cpmsg('uc_database_connect_error', '', 'error');
 			} else {
-				if(function_exists("mysql_connect")) {
-					mysql_close($uc_dblink);
-				} else {
-					$uc_dblink->close();
-				}
+				mysql_close($uc_dblink);
 			}
 		}
 
@@ -2841,11 +2749,8 @@ EOT;
 
 
 
-	if($operation == 'seccheck') {
-		if(!is_numeric($settingnew['seccodedata']['type']) && !preg_match('/^[\w\_]+:[\w\_]+$/', $settingnew['seccodedata']['type'])) {
-			$settingnew['seccodedata']['type'] = 0;
-		}
-		$settingnew['seccodestatus'] = $settingnew['seccodedata']['rule']['register']['allow'] || $settingnew['seccodedata']['rule']['login']['allow'] || $settingnew['seccodedata']['rule']['post']['allow'] || $settingnew['seccodedata']['rule']['password']['allow'] || $settingnew['seccodedata']['rule']['card']['allow'] ? 1 : 0;
+	if($operation == 'sec') {
+		$settingnew['seccodestatus'] = bindec(intval($settingnew['seccodestatus'][5]).intval($settingnew['seccodestatus'][4]).intval($settingnew['seccodestatus'][3]).intval($settingnew['seccodestatus'][2]).intval($settingnew['seccodestatus'][1]));
 		if(is_array($_GET['delete'])) {
 			C::t('common_secquestion')->delete($_GET['delete']);
 		}
@@ -2862,9 +2767,7 @@ EOT;
 		C::t('common_secquestion')->delete_by_type(1);
 		if(is_array($_GET['secqaaext'])) {
 			foreach($_GET['secqaaext'] as $ext) {
-				if(preg_match('/^[\w\_:]+$/', $ext)) {
-					DB::insert('common_secquestion', array('type' => '1', 'question' => $ext));
-				}
+				DB::insert('common_secquestion', array('type' => '1', 'question' => $ext));
 			}
 		}
 
@@ -2882,8 +2785,6 @@ EOT;
 
 		$settingnew['secqaa']['status'] = bindec(intval($settingnew['secqaa']['status'][3]).intval($settingnew['secqaa']['status'][2]).intval($settingnew['secqaa']['status'][1]));
 		$settingnew['secqaa'] = serialize($settingnew['secqaa']);
-
-	} elseif($operation == 'sec') {
 		if(!preg_match('/^[A-z]\w+?$/', $settingnew['reginput']['username'])) {
 			$settingnew['reginput']['username'] =  'username';
 		}
@@ -3011,17 +2912,6 @@ EOT;
 
 	if(isset($settingnew['dateformat'])) {
 		$settingnew['dateformat'] = dateformat($settingnew['dateformat'], 'format');
-	}
-
-	if($settingnew['accountguard']) {
-		$settingnew['accountguard'] = serialize($settingnew['accountguard']);
-	}
-
-	if(!empty($_G['gp_aggid'])) {
-		foreach($_G['gp_aggid'] as $gid => $v) {
-			C::t('common_usergroup_field')->update($gid, array('forcelogin' => $v));
-		}
-		updatecache('usergroups');
 	}
 
 	if($isfounder && isset($settingnew['ftp'])) {
